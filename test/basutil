@@ -1,0 +1,180 @@
+Option Compare Database
+
+Public Function GetGlobalDataDate() As Date
+    GetGlobalDataDate = GetConfigurationData("GlobalDataDate")
+End Function
+
+Public Function GetIsMonthFirstDate() As String
+    GetIsMonthFirstDate = GetConfigurationData("IsMonthFirstDate")
+End Function
+
+Public Function GetPreviousDate() As Date
+    GetPreviousDate = GetConfigurationData("PreviousDate")
+End Function
+
+Public Function GetPreviousMonthEndDate() As Date
+    GetPreviousMonthEndDate = GetConfigurationData("PreviousMonthEndDate")
+End Function
+
+Private Function GetConfigurationData(ByVal fieldName As String) As Variant
+    Dim dbRst As Recordset
+    Dim dbs As Database
+    Set dbs = CurrentDb
+    
+    Dim SQLStr As String
+    SQLStr = "SELECT TOP 1 * FROM Configuration"
+    
+    Set dbRst = dbs.OpenRecordset(SQLStr)
+    
+    Dim resDate As Variant
+    If dbRst.EOF = False Then
+        resDate = dbRst(fieldName)
+    Else
+        resDate = today
+    End If
+    
+    dbRst.Close
+    Set dbRst = Nothing
+    GetConfigurationData = resDate
+
+End Function
+
+Public Function GetFilePath(ByVal fileID As String) As String
+    
+    Dim dbRst As Recordset
+    Dim dbs As Database
+    Set dbs = CurrentDb
+    
+    Dim parm As String
+    parm = "'" & fileID & "'" ' using ' ' to quote parameter
+    
+    Dim SQLStr As String
+    SQLStr = "SELECT * FROM FilePaths WHERE FilePaths.PathID = " & parm
+    
+    Set dbRst = dbs.OpenRecordset(SQLStr)
+    
+    Dim res As String
+    If dbRst.EOF = False Then
+        res = dbRst("PathName")
+    Else
+        res = ""
+    End If
+    
+    dbRst.Close
+    Set dbRst = Nothing
+    GetFilePath = res
+End Function
+
+Public Function GetFileExtensionFormat(ByVal fileID As String) As String
+    Dim dbRst As Recordset
+    Dim dbs As Database
+    Set dbs = CurrentDb
+    
+    Dim parm As String
+    parm = "'" & fileID & "'" ' using ' ' to quote parameter
+    
+    Dim SQLStr As String
+    SQLStr = "SELECT * FROM FilePaths WHERE FilePaths.PathID = " & parm
+    
+    Set dbRst = dbs.OpenRecordset(SQLStr)
+    
+    Dim res As String
+    If dbRst.EOF = False Then
+        res = dbRst("ExtensionFormat")
+    Else
+        res = ""
+    End If
+    
+    dbRst.Close
+    Set dbRst = Nothing
+    GetFileExtensionFormat = res
+
+End Function
+
+Public Function GetFXClosingRate(ByVal dat As Date, ByVal ccy As String) As Double
+    If ccy = "TWD" Then
+        GetFXClosingRate = 1#
+        Exit Function
+    End If
+    Dim dbRst As Recordset
+    Dim dbs As Database
+    Set dbs = CurrentDb
+    
+    Dim parm1 As String
+    parm1 = "#" & dat & "#" ' using # # to quote date parameter
+    Dim parm2 As String
+    parm2 = "'" & ccy & "'"
+    
+    Dim SQLStr As String
+    SQLStr = "SELECT * FROM ClosingRates WHERE ClosingRates.DataDate = " & parm1 & _
+     " AND " & "ClosingRates.Currency1 = " & parm2
+    
+    Set dbRst = dbs.OpenRecordset(SQLStr)
+    
+    Dim res As Double
+    If dbRst.EOF = False Then
+        res = dbRst("ClosingRate")
+    Else
+        res = ""
+    End If
+    
+    dbRst.Close
+    Set dbRst = Nothing
+    
+    GetFXClosingRate = res
+End Function
+
+Public Function GetStockDealerAdjustedPL(ByVal DealerName As String, ByVal recordYear As Long) As Double
+    Dim dbRst As Recordset
+    Dim dbs As Database
+    Set dbs = CurrentDb
+    
+    Dim parm1 As String
+    parm1 = "'" & DealerName & "'" ' using ' ' to quote parameter
+    
+    Dim SQLStr As String
+    SQLStr = "SELECT * FROM StockDealerAdjustedPLs WHERE StockDealerAdjustedPLs.DealerName = " & parm1 _
+     & " AND " & "StockDealerAdjustedPLs.RecordYear = " & recordYear
+    
+    Set dbRst = dbs.OpenRecordset(SQLStr)
+    
+    Dim res As String
+    If dbRst.EOF = False Then
+        res = dbRst("AdjustAmount")
+    Else
+        res = ""
+    End If
+    
+    dbRst.Close
+    Set dbRst = Nothing
+    GetStockDealerAdjustedPL = res
+End Function
+
+Public Function GetFundAdjustedPL(ByVal sDealerName As String, ByVal recordYear As Long) As Double
+    Dim dbRst As Recordset
+    Dim dbs As Database
+    Set dbs = CurrentDb
+    
+    Dim parm1 As String
+    parm1 = "'" & sDealerName & "'" ' using ' ' to quote parameter
+    
+    Dim SQLStr As String
+    SQLStr = "SELECT * FROM FundAdjustedPLs WHERE FundAdjustedPLs.DealerName = " & parm1 _
+     & " AND " & "FundAdjustedPLs.RecordYear = " & recordYear
+    
+    Set dbRst = dbs.OpenRecordset(SQLStr)
+    
+    Dim res As Double
+    If dbRst.EOF = False Then
+        res = dbRst("AdjustAmount")
+    Else
+        res = 0#
+    End If
+    
+    dbRst.Close
+    Set dbRst = Nothing
+    GetFundAdjustedPL = res
+End Function
+
+
+
